@@ -1,47 +1,26 @@
 package Entities;
 
+
+import DatabaseHandler.DatabaseHandler;
+
 public class Route {
     int id;
-    int airlineID;
     int startAirportID;
     int destinationAirportID;
 
-    public Route(int id, int airlineID, int startAirportID, int destinationAirportID) {
-        this.id = id;
-        this.airlineID = airlineID;
+
+    public Route( int startAirportID, int destinationAirportID) {
+
         this.startAirportID = startAirportID;
         this.destinationAirportID = destinationAirportID;
     }
 
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public int getAirlineID() {
-        return airlineID;
-    }
-
-    public void setAirlineID(int airlineID) {
-        this.airlineID = airlineID;
-    }
-
-    public int getStartAirportID() {
+    public int getStartAirport() {
         return startAirportID;
     }
 
-    public void setStartAirportID(int startAirportID) {
-        this.startAirportID = startAirportID;
-    }
-
-    public int getDestinationAirportID() {
+    public int getDestinationAirport() {
         return destinationAirportID;
     }
 
-    public void setDestinationAirportID(int destinationAirportID) {
-        this.destinationAirportID = destinationAirportID;
-    }
 }

@@ -11,6 +11,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.util.LinkedList;
+
+import DatabaseHandler.DatabaseHandler;
 import Entities.Airport;
 
 public class SwingAirlinesFrame extends JFrame {
@@ -23,7 +25,7 @@ public class SwingAirlinesFrame extends JFrame {
     private MapPanel mapPanel1;
 
     private DatabaseHandler dbHandler;
-    private Airport selectedStartAirport;
+    private Airport         selectedStartAirport;
     private Airport selectedDestinationAirport;
     private Border  defaultTextFieldBorder;
 
@@ -36,6 +38,11 @@ public class SwingAirlinesFrame extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 SearchForStartAirport();
                 SearchForDestinationAirport();
+                if (selectedStartAirport != null && selectedDestinationAirport != null){
+                    initAirportGraph();
+
+                }
+
                 mapPanel1.repaint();
             }
         });
@@ -62,7 +69,7 @@ public class SwingAirlinesFrame extends JFrame {
         this.selectedDestinationAirport = selectedDestinationAirport;
     }
 
-    public void SearchForStartAirport() {
+    public Airport SearchForStartAirport() {
         String SearchTerm = StartTextfield.getText().trim();
 
         if (!SearchTerm.isEmpty()) {
@@ -81,12 +88,18 @@ public class SwingAirlinesFrame extends JFrame {
                     "Startflughafen Auswahl",
                     JOptionPane.QUESTION_MESSAGE,
                     null,
-                    resultAirportList.toArray(),  // Auswahlmöglichkeiten
+                    resultAirportList.toArray(),
                     null
                 );
-
-                StartTextfield.setText(selectedStartAirport.getIATA());
-                StartLabel.setText(selectedStartAirport.getName());
+                if (selectedStartAirport != null){
+                    StartTextfield.setText(selectedStartAirport.getIATA());
+                    StartLabel.setText(selectedStartAirport.getName());
+                }else{
+                    //nothing selected
+                    StartTextfield.setBorder(new LineBorder(Color.RED, 2));
+                    selectedStartAirport = null;
+                    StartLabel.setText("");
+                }
             } else {
                 //no hit
                 StartTextfield.setBorder(new LineBorder(Color.RED, 2));
@@ -98,9 +111,10 @@ public class SwingAirlinesFrame extends JFrame {
             selectedStartAirport = null;
             StartLabel.setText("");
         }
+        return selectedStartAirport;
     }
 
-    public void SearchForDestinationAirport() {
+    public Airport SearchForDestinationAirport() {
         {
             String SearchTerm = DestinationTextfield.getText().trim();
 
@@ -124,8 +138,15 @@ public class SwingAirlinesFrame extends JFrame {
                         null
                     );
 
-                    DestinationTextfield.setText(selectedDestinationAirport.getIATA());
-                    DestinationLabel.setText(selectedDestinationAirport.getName());
+                    if(selectedDestinationAirport != null){
+                        DestinationTextfield.setText(selectedDestinationAirport.getIATA());
+                        DestinationLabel.setText(selectedDestinationAirport.getName());
+                    }else{
+                        //nothing selected
+                        DestinationTextfield.setBorder(new LineBorder(Color.RED, 2));
+                        selectedDestinationAirport = null;
+                        DestinationLabel.setText("");
+                    }
                 } else {
                     //no hit
                     DestinationTextfield.setBorder(new LineBorder(Color.RED, 2));
@@ -138,7 +159,7 @@ public class SwingAirlinesFrame extends JFrame {
                 DestinationLabel.setText("");
             }
         }
-
+        return selectedDestinationAirport;
     }
 
     private void createUIComponents() {
@@ -148,4 +169,8 @@ public class SwingAirlinesFrame extends JFrame {
             System.err.println("Panel cannot be instantiated ");
         }
     }
+
+    private void initAirportGraph() {}
+
+
 }
