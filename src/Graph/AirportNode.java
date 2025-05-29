@@ -1,54 +1,75 @@
 package Graph;
 
 import Entities.Airport;
+import Entities.Route;
+import Entities.RouteList;
 
 import java.util.HashMap;
-import java.util.List;
+import java.util.LinkedList;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class AirportNode {
-    final private Airport           startAirport;
-    private Map<AirportNode, Float> neighbors = new HashMap<>();
+    private static final Map<String, AirportNode> nodeRegistry = new ConcurrentHashMap<>();
+
     private AirportGraph            parent;
+    private Airport                 fromAiport;
+    private Map<AirportNode, Float> neighbors;
+    private RouteList               neighborRoutes;
 
-    AirportNode(Airport startAirport, AirportGraph parent) {
-        this.startAirport = startAirport;
+    private AirportNode(Airport fromAirport, AirportGraph parent) {
+        this.fromAiport = fromAirport;
         this.parent = parent;
+        neighbors = new HashMap<>();
+        neighborRoutes = new RouteList();
     }
 
-    public Airport getStartAirport(){
-        return this.startAirport;
+    public static AirportNode getOrCreate(Airport fromAirport, AirportGraph parent) {
+        String key = generateKey(fromAirport);
+        return nodeRegistry.computeIfAbsent(key, k -> new AirportNode(fromAirport, parent));
     }
 
-    public void addNeighbor(AirportNode neighbor, float weight){
-        neighbors.put(neighbor, weight);
+    public static AirportNode getOrCreate(Route r, AirportGraph parent) {
+        String key = generateKey(r.getFromAirport());
+        return nodeRegistry.computeIfAbsent(key, k -> new AirportNode(r.getFromAirport(), parent));
     }
 
-    Map<AirportNode, Float> getNeighbors(Airport breakAt) {
-        if (neighbors.isEmpty()) {
-            List<AirportNode> neighborsList = parent.loadNeighborsFromDatabase(this.startAirport, breakAt);
-            if (!neighborsList.isEmpty()){
-                for(AirportNode neighbor : neighborsList ){
-                    neighbors.put(neighbor, calucateWeight(this.getStartAirport(),neighbor.getStartAirport()));
-                    parent.addConnectionWeighted(this.startAirport,neighbor.getStartAirport(),
-                                                calucateWeight(this.getStartAirport(),neighbor.getStartAirport()));
-                }
-            }
+    public static String generateKey(Airport airport) {
+        return airport.getIATA();
+    }
+
+    public String getAirportNodeKey() {
+        return generateKey(fromAiport);
+    }
+
+    public void discoverNeighbors() {
+        this.neighborRoutes.clear();
+        RouteList routes = parent.getRouteList().findRoutesBySource(this.fromAiport);
+        this.neighborRoutes.addAll(routes);
+
+        for (Route r : this.neighborRoutes) {
+            this.addNeighbor(r.getToAirport(), r.getWeight());
         }
+    }
+
+    public void addNeighbor(Airport neighborAirport, float weight) {
+        neighbors.putIfAbsent(getOrCreate(neighborAirport, this.parent), weight);
+    }
+
+    public Airport getFromAirport() {
+        return this.fromAiport;
+    }
+
+    public RouteList getNeighborRoutes() {
+        return this.neighborRoutes;
+    }
+
+    public Map<AirportNode, Float> getNeighbors() {
         return neighbors;
     }
 
-    public static float calucateWeight(Airport a1, Airport a2){
-        float dLat = a2.getLatitude() - a1.getLatitude();
-        float dLon = a2.getLongitude() - a1.getLongitude();
-
-        dLon = Math.abs(dLon);
-        if (dLon > 180) {
-            dLon = 360 - dLon;
-        }
-
-        return (float) Math.sqrt(dLat * dLat + dLon * dLon);
+    @Override
+    public String toString() {
+        return getAirportNodeKey();
     }
-
-
 }
