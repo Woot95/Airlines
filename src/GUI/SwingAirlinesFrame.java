@@ -105,43 +105,51 @@ public class SwingAirlinesFrame extends JFrame {
         LinkedList<Airport> resultDestinationAirportList;
         resultDestinationAirportList = searchWithSearchField(DestinationTextfield);
 
-        if ( resultStartAirportList.size() > 0
-             resultDestinationAirportList.size() > 0
-
-        airportChooser = new AirportChooser(this, resultStartAirportList, resultDestinationAirportList);
-
-        int result = airportChooser.showConfirmDialog();
-
-        StartTextfield.setBorder(defaultTextFieldBorder);
-        DestinationTextfield.setBorder(defaultTextFieldBorder);
-
-        StartLabel.setText("");
-        DestinationLabel.setText("");
-
         validState toAirportValidState;
         validState fromAirportValidState;
 
         fromAirportValidState = validState.VALID;
         toAirportValidState = validState.VALID;
-        switch (result) {
-            case JOptionPane.OK_OPTION:
-                Airport selectedfromItem = (Airport) this.airportChooser.getAirlineSelectionPanel().getFromBox().getSelectedItem();
-                if (Objects.isNull(selectedfromItem)) {
-                    fromAirportValidState = validState.ERROR;
-                }
-                Airport selectedToItem = (Airport) this.airportChooser.getAirlineSelectionPanel().getToBox().getSelectedItem();
-                if (Objects.isNull(selectedToItem)) {
-                    toAirportValidState = validState.ERROR;
-                }
-                break;
 
-            case JOptionPane.CANCEL_OPTION:
-            case JOptionPane.CLOSED_OPTION:
+        if (!resultStartAirportList.isEmpty() &&
+            !resultDestinationAirportList.isEmpty()) {
+
+            airportChooser = new AirportChooser(this, resultStartAirportList, resultDestinationAirportList);
+
+            int result = airportChooser.showConfirmDialog();
+
+            StartTextfield.setBorder(defaultTextFieldBorder);
+            DestinationTextfield.setBorder(defaultTextFieldBorder);
+
+            StartLabel.setText("");
+            DestinationLabel.setText("");
+            switch (result) {
+                case JOptionPane.OK_OPTION:
+                    Airport selectedfromItem = (Airport) this.airportChooser.getAirlineSelectionPanel().getFromBox().getSelectedItem();
+                    if (Objects.isNull(selectedfromItem)) {
+                        fromAirportValidState = validState.ERROR;
+                    }
+                    Airport selectedToItem = (Airport) this.airportChooser.getAirlineSelectionPanel().getToBox().getSelectedItem();
+                    if (Objects.isNull(selectedToItem)) {
+                        toAirportValidState = validState.ERROR;
+                    }
+                    break;
+
+                case JOptionPane.CANCEL_OPTION:
+                case JOptionPane.CLOSED_OPTION:
+                    fromAirportValidState = validState.ERROR;
+                    toAirportValidState = validState.ERROR;
+                    break;
+            }
+        }else{
+            if(resultStartAirportList.size() > 0)
                 fromAirportValidState = validState.ERROR;
+            if(resultDestinationAirportList.size() > 0)
                 toAirportValidState = validState.ERROR;
-                break;
+
         }
-        setValidState(fromAirportValidState, toAirportValidState);
+            setValidState(fromAirportValidState, toAirportValidState);
+
     }
 
     private LinkedList<Airport> searchWithSearchField(JTextField searchField) {
